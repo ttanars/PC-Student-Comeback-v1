@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PC|Student Comeback v1</title> <link rel="shortcut icon" type="image/png" href="https://img2.pic.in.th/pic/Pakchong_School-removebg-preview.png">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+    <style>
+        body { font-family: 'Sarabun', sans-serif; background-color: #f8f9fa; }
+        .signature-pad-container { border: 1px solid #dee2e6; height: 150px; position: relative; }
+        .signature-canvas { width: 100%; height: 100%; }
+        /* --- START: MODIFIED STYLE --- */
+        .needs-validation .form-control:invalid, .was-validated .form-control:invalid { border-color: #dc3545; }
+        .needs-validation .form-control:invalid:focus, .was-validated .form-control:invalid:focus { box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25); }
+        .invalid-tooltip { font-size: 0.875rem; }
+        /* --- END: MODIFIED STYLE --- */
+        .col-form-label { padding-top: calc(0.375rem + 1px); padding-bottom: calc(0.375rem + 1px); margin-bottom: 0; font-size: inherit; line-height: 1.5; }
+        .border-danger { border-color: #dc3545 !important; }
+        @media print {
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+<div id="app" class="container p-md-4 p-lg-5 bg-white shadow-lg my-5" style="max-width: 900px;">
+
+    <div class="card border-0">
+        <div class="card-body p-4">
+            <div class="row align-items-center mb-2">
+                <div class="col-4">
+                    <img src="https://lh3.googleusercontent.com/d/1N-FDOxt2QQhL7ynHxjN27GqMhSHIADgI" alt="logo" style="height: 1.5cm;">
+                </div>
+                <div class="col-4 text-center">
+                    <h1 class="h3 fw-bold text-dark">บันทึกข้อความ</h1>
+                </div>
+                <div class="col-4"></div>
+            </div>
+            <p class="mb-1"><strong>ส่วนราชการ</strong> งานวินัยนักเรียน กลุ่มงานกิจการนักเรียน โรงเรียนปากช่อง</p>
+            <div class="row">
+                <div class="col-md-6">
+                    <strong>ที่</strong> กน.10/
+                    <select class="form-select form-select-sm d-inline-block" style="width: auto;" v-model="form.refNo">
+                       <option value="">  </option>
+                       <option v-for="n in 200" :key="n" :value="n">{{ n }}</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <strong class="me-2">วันที่</strong>
+                    <label class="position-relative d-inline-flex align-items-center border rounded px-2 py-1">
+                        <span class="me-2">{{ formattedDate }}</span>
+                        <i class="fas fa-calendar-alt text-secondary"></i>
+                        <input type="date" v-model="form.date" class="position-absolute top-0 start-0 w-100 h-100" style="opacity: 0; cursor: pointer;">
+                    </label>
+                </div>
+            </div>
+            <div class="mt-2"><strong>เรื่อง</strong> นักเรียนขาดเรียน/ หนีเรียน</div>
+            <hr class="my-2">
+            <div class="mt-1">เรียน ผู้อำนวยการโรงเรียนปากช่อง</div>
+        </div>
+    </div>
+
+    <form @submit.prevent="submitForm" class="needs-validation" novalidate>
+        <div class="p-4 border rounded bg-light">
+            <div class="container-fluid px-0">
+                <div class="row gx-3 gy-2 align-items-center mb-3">
+                    <div class="col-auto" style="text-indent: 2.5em;"><label class="col-form-label">ข้าพเจ้า</label></div>
+                    <div class="col-sm-4 col-md-3 position-relative">
+                        <input type="text" placeholder="ชื่อ-สกุลครูที่ปรึกษา" class="form-control form-control-sm" v-model.trim="form.teacherName" required>
+                        <div class="invalid-tooltip">กรุณากรอกชื่อ-สกุลครูที่ปรึกษา</div>
+                    </div>
+                    <div class="col-auto"><label class="col-form-label">เป็นครูที่ปรึกษา ม.</label></div>
+                    <div class="col-sm-2 position-relative">
+                        <input type="text" placeholder="ชั้น/ห้อง" class="form-control form-control-sm" v-model.trim="form.className" required pattern="^[1-6]\/[1-9][0-9]*$">
+                        <div class="invalid-tooltip">ใส่ "ชั้น/ห้อง" (เช่น 6/12)</div>
+                    </div>
+                </div>
+
+                <div class="row gx-2 gy-2 align-items-center mb-3">
+                    <div class="col-auto">
+                        <label class="col-form-label" style="line-height: 1;">ได้ติดตามการมาเรียนของนักเรียน ซึ่งขาดเรียนติดต่อกัน ๓ วัน หรือหนีเรียน ๓ ชั่วโมงต่อสัปดาห์ขึ้นไป โดยได้ติดตาม</label>
+                    </div>
+					<div class="col-auto">
+                        <label class="col-form-label" style="line-height: 1;">นักเรียน เป็นครั้งที่</label>
+                    </div>
+                    <div class="col-auto">
+                        <select class="form-select form-select-sm" style="width: auto;" v-model="form.occurrence">
+                            <option>1</option> <option>2</option> <option>3</option>
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <label class="col-form-label" style="line-height: 1;">ตั้งแต่วันที่</label>
+                    </div>
+                    <div class="col-auto">
+                        <label class="position-relative d-inline-flex align-items-center border rounded px-2 py-1" :class="{'is-invalid': !form.startDate && wasValidated}">
+                            <span class="me-2">{{ formattedStartDate || 'เลือกวันที่' }}</span><i class="fas fa-calendar-alt text-secondary"></i>
+                            <input type="date" v-model="form.startDate" class="position-absolute top-0 start-0 w-100 h-100" style="opacity: 0; cursor: pointer;" required>
+                        </label>
+                    </div>
+                    <div class="col-auto">
+                        <label class="col-form-label" style="line-height: 1;">ถึงวันที่</label>
+                    </div>
+                    <div class="col-auto">
+                        <label class="position-relative d-inline-flex align-items-center border rounded px-2 py-1" :class="{'is-invalid': !form.endDate && wasValidated}">
+                            <span class="me-2">{{ formattedEndDate || 'เลือกวันที่' }}</span><i class="fas fa-calendar-alt text-secondary"></i>
+                            <input type="date" v-model="form.endDate" class="position-absolute top-0 start-0 w-100 h-100" style="opacity: 0; cursor: pointer;" required>
+                        </label>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div v-for="(student, index) in form.students" :key="index" class="row g-2 align-items-center mb-2 p-2 border rounded">
+                        <div class="col-auto fw-bold">{{ index + 1 }}.</div>
+                        <div class="col-sm-4 position-relative">
+                            <label class="form-label visually-hidden">ชื่อ-สกุลนักเรียน</label>
+                            <input type="text" placeholder="ชื่อ-สกุลนักเรียน" class="form-control form-control-sm" v-model.trim="student.name" required>
+                            <div class="invalid-tooltip">กรุณากรอกชื่อ-สกุลนักเรียน</div>
+                        </div>
+                        <div class="col-auto"><label class="col-form-label">เลขประจำตัว</label></div>
+                        <div class="col-sm-2 position-relative">
+                            <input type="text" placeholder="เลขประจำตัว" class="form-control form-control-sm" v-model.trim="student.id" required pattern="\d{1,5}" maxlength="5">
+                            <div class="invalid-tooltip">ใส่เลข 5 หลัก</div>
+                        </div>
+                        <div class="col-auto">
+                            <span class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" :name="'absenceType-' + index" :id="'absent-' + index" value="ไม่มาโรงเรียน" v-model="student.absenceType" required>
+                                <label class="form-check-label" :for="'absent-' + index">ขาดเรียน</label>
+                            </span>
+                            <span class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" :name="'absenceType-' + index" :id="'truant-' + index" value="หนีเรียน" v-model="student.absenceType" required>
+                                <label class="form-check-label" :for="'truant-' + index">หนีเรียน</label>
+                            </span>
+                        </div>
+                        <div class="col-auto">
+                            <button type="button" class="btn btn-danger btn-sm" @click="removeStudent(index)" v-if="form.students.length > 1">
+                                <i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <button type="button" class="btn btn-success btn-sm" @click="addStudent" v-if="form.students.length < 10">
+                            <i class="fas fa-plus"></i> เพิ่มรายชื่อนักเรียน
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="mt-3 position-relative">
+                    <label for="followUpResult" class="form-label" style="text-indent: 2.5em;">ข้าพเจ้าได้ติดตามผ่านช่องทางไลน์/ โทรศัพท์ผู้ปกครอง และส่งจดหมายแล้ว ผลการติดตามนักเรียน ดังนี้</label>
+                    <textarea class="form-control" id="followUpResult" rows="3" placeholder="ระบุผลการติดตาม..." v-model.trim="form.followUpResult" required></textarea>
+                    <div class="invalid-tooltip">กรุณาระบุผลการติดตาม</div>
+                </div>
+            </div>
+
+			<div class="col-auto mt-2" style="text-indent: 2.5em;"><label class="col-form-label">จึงเรียนเพื่อโปรดพิจารณา</label></div>
+			<div class="d-flex justify-content-center mt-4">
+                <div class="text-center w-100" style="max-width: 400px;">
+                    <p class="fw-bold">ลงชื่อครูที่ปรึกษา</p>
+                    <div class="signature-pad-container mt-2" :class="{ 'border-danger': isSignatureInvalid }">
+                        <canvas class="signature-canvas"></canvas>
+                    </div>
+                    <div v-if="isSignatureInvalid" class="text-danger small mt-1">กรุณาลงลายมือชื่อ</div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary mt-1 clear-signature-btn no-print">ล้างลายเซ็น</button>
+                    <p class="mt-2 mb-0">( {{ form.teacherName || '.........................................' }} )</p>
+                    <p class="small">ตำแหน่งครูที่ปรึกษา ชั้น ม. {{ form.className || '.../...' }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="d-flex justify-content-center gap-3 my-4 no-print">
+            <button type="submit" class="btn btn-primary btn-lg">
+                <i class="fas fa-paper-plane me-2"></i>ส่งข้อมูลและสร้าง PDF
+            </button>
+        </div>
+    </form>
+    </div>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    const { createApp, ref, computed, onMounted } = Vue
+    
+    let teacherSignaturePad = null;
+
+    function formatDateToThai(dateString) {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        const localDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+        const thaiMonths = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+        return `${localDate.getDate()} ${thaiMonths[localDate.getMonth()]} พ.ศ. ${localDate.getFullYear() + 543}`;
+    }
+
+    createApp({
+        setup() {
+            // --- START: MODIFIED CODE ---
+            const getWeekBoundaries = () => {
+                const today = new Date();
+                const day = today.getDay(); // Sunday - 0, Monday - 1
+                const mondayOffset = (day === 0) ? -6 : 1 - day; // Adjust for Sunday
+                
+                const monday = new Date(today);
+                monday.setDate(today.getDate() + mondayOffset);
+                
+                const friday = new Date(monday);
+                friday.setDate(monday.getDate() + 4);
+
+                const toYYYYMMDD = (d) => d.toISOString().slice(0, 10);
+                return { start: toYYYYMMDD(monday), end: toYYYYMMDD(friday) };
+            };
+            const week = getWeekBoundaries();
+
+            const form = ref({
+                refNo: '', date: new Date().toISOString().slice(0, 10), teacherName: '',
+                className: '', occurrence: 1, 
+                startDate: week.start, // Set default start date
+                endDate: week.end,     // Set default end date
+                students: [ { name: '', id: '', absenceType: 'ไม่มาโรงเรียน' } ],
+                followUpResult: ''
+            });
+            // --- END: MODIFIED CODE ---
+
+            const isSignatureInvalid = ref(false);
+            const wasValidated = ref(false);
+
+            const formattedDate = computed(() => formatDateToThai(form.value.date));
+            const formattedStartDate = computed(() => formatDateToThai(form.value.startDate));
+            const formattedEndDate = computed(() => formatDateToThai(form.value.endDate));
+            
+            const addStudent = () => {
+                if (form.value.students.length < 10) {
+                    form.value.students.push({ name: '', id: '', absenceType: 'ไม่มาโรงเรียน' });
+                }
+            };
+
+            const removeStudent = (index) => {
+                if (form.value.students.length > 1) {
+                    form.value.students.splice(index, 1);
+                }
+            };
+            
+            const resetForm = (formElement) => {
+                const newWeek = getWeekBoundaries();
+                formElement.classList.remove('was-validated');
+                formElement.reset();
+                wasValidated.value = false;
+                teacherSignaturePad.clear();
+                isSignatureInvalid.value = false;
+                Object.assign(form.value, {
+                    refNo: '', date: new Date().toISOString().slice(0, 10),
+                    teacherName: '', className: '', occurrence: 1,
+                    startDate: newWeek.start, // Reset to current week's Monday
+                    endDate: newWeek.end,     // Reset to current week's Friday
+                    students: [{ name: '', id: '', absenceType: 'ไม่มาโรงเรียน' }],
+                    followUpResult: ''
+                });
+            };
+
+            onMounted(() => {
+                const canvas = document.querySelector('.signature-canvas');
+                teacherSignaturePad = new SignaturePad(canvas, { penColor: 'rgb(0, 0, 0)' });
+                function resizeCanvas() {
+                    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+                    const rect = canvas.getBoundingClientRect();
+                    canvas.width = rect.width * ratio;
+                    canvas.height = rect.height * ratio;
+                    canvas.getContext("2d").scale(ratio, ratio);
+                    teacherSignaturePad.clear();
+                }
+                window.addEventListener("resize", resizeCanvas);
+                resizeCanvas();
+                teacherSignaturePad.addEventListener("beginStroke", () => { isSignatureInvalid.value = false; });
+                document.querySelector('.clear-signature-btn').addEventListener('click', () => { teacherSignaturePad.clear(); });
+            });
+            
+            const submitForm = (event) => {
+                const formElement = event.target;
+                wasValidated.value = true;
+                formElement.classList.add('was-validated'); // Ensure class is added for tooltips
+                isSignatureInvalid.value = teacherSignaturePad && teacherSignaturePad.isEmpty();
+                
+                if (!formElement.checkValidity() || isSignatureInvalid.value) {
+                    Swal.fire({ icon: 'error', title: 'ข้อมูลไม่สมบูรณ์', text: 'กรุณากรอกข้อมูลและลงลายมือชื่อให้ครบถ้วน' });
+                    return;
+                }
+
+                const webAppUrl = 'https://script.google.com/macros/s/AKfycbxweZRSZJmjE0rd1pXQz3KP5-r4utS43uBKfeuYq663MfNxuZ6yeUORcZaHeGxo4gOG/exec'; 
+
+                Swal.fire({
+                    title: 'กำลังส่งข้อมูล...', text: 'กรุณารอสักครู่',
+                    allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }
+                });
+
+                const formData = new FormData();
+                for (const key in form.value) {
+                    if (key === 'students') {
+                        formData.append('students', JSON.stringify(form.value.students));
+                    } else {
+                        formData.append(key, form.value[key]);
+                    }
+                }
+                formData.append('signatureBase64', teacherSignaturePad.toDataURL('image/png'));
+
+                fetch(webAppUrl, { method: 'POST', body: formData })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'สร้างเอกสารสำเร็จ!',
+                            html: `<p>บันทึกข้อมูลและสร้าง PDF เรียบร้อยแล้ว</p>`,
+                            showConfirmButton: true,
+                            confirmButtonText: '<i class="fas fa-download"></i> ดาวน์โหลด PDF',
+                            showDenyButton: true,
+                            denyButtonText: '<i class="fas fa-print"></i> พิมพ์ PDF',
+                            showCancelButton: true,
+                            cancelButtonText: 'กรอกฟอร์มใหม่'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.open(data.pdfDownloadUrl, '_blank');
+                            } else if (result.isDenied) {
+                                window.open(data.pdfPrintUrl, '_blank');
+                            }
+                            resetForm(formElement);
+                        });
+                    } else {
+                        throw new Error(data.message || 'เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+                    }
+                })
+                .catch(error => {
+                    console.error('Fetch Error:', error);
+                    Swal.fire({
+                        icon: 'error', title: 'การเชื่อมต่อล้มเหลว',
+                        html: `ไม่สามารถส่งข้อมูลได้ โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ต<br><br><small><i>Error: ${error.message}</i></small>`,
+                    });
+                });
+            }
+
+            return { 
+                form, submitForm, formattedDate, formattedStartDate, formattedEndDate, 
+                isSignatureInvalid, wasValidated, addStudent, removeStudent
+            }
+        }
+    }).mount('#app')
+</script>
+
+</body>
+</html>
