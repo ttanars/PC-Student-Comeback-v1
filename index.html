@@ -4,185 +4,385 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PC|Student Comeback v1</title> <link rel="shortcut icon" type="image/png" href="https://img2.pic.in.th/pic/Pakchong_School-removebg-preview.png">
+    <title>PC|Student Comeback v1</title>
+    <link rel="shortcut icon" type="image/png" href="https://img2.pic.in.th/pic/Pakchong_School-removebg-preview.png">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap5.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/3.0.2/css/responsive.bootstrap5.css">
+    
     <style>
         body { font-family: 'Sarabun', sans-serif; background-color: #f8f9fa; }
         .signature-pad-container { border: 1px solid #dee2e6; height: 150px; position: relative; }
         .signature-canvas { width: 100%; height: 100%; }
-        /* --- START: MODIFIED STYLE --- */
         .needs-validation .form-control:invalid, .was-validated .form-control:invalid { border-color: #dc3545; }
-        .needs-validation .form-control:invalid:focus, .was-validated .form-control:invalid:focus { box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25); }
         .invalid-tooltip { font-size: 0.875rem; }
-        /* --- END: MODIFIED STYLE --- */
         .col-form-label { padding-top: calc(0.375rem + 1px); padding-bottom: calc(0.375rem + 1px); margin-bottom: 0; font-size: inherit; line-height: 1.5; }
         .border-danger { border-color: #dc3545 !important; }
-        @media print {
-            .no-print { display: none !important; }
+        
+        /* --- STYLING UPDATES --- */
+        /* Tab active and hover color */
+        .nav-tabs .nav-link {
+            transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+        }
+        .nav-tabs .nav-link.active {
+            color: #fff;
+            background-color: #0d6efd;
+            border-color: #0d6efd #0d6efd #0d6efd;
+            font-weight: 500;
+        }
+        .nav-tabs .nav-link:hover:not(.active) {
+            background-color: #e9ecef;
+            border-color: #dee2e6;
+        }
+        
+        /* DataTable header color */
+        #studentDataTable thead {
+            background-color: #212529 !important;
+            color: white !important;
+        }
+        
+        #studentDataTable thead th {
+             background-color: #212529 !important;
+            color: white !important;
+        }
+
+        /* DataTable row hover effect */
+        .table-hover > tbody > tr:hover {
+            --bs-table-hover-bg: rgba(0, 0, 0, 0.06);
+            cursor: default;
+        }
+
+        /* Student image hover effect */
+        .student-image-hoverable {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .student-image-hoverable:hover {
+            transform: scale(2.5);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 10;
+            position: relative;
+        }
+        @media print { .no-print { display: none !important; } }
+		
+		.app-banner {
+            width: 100%;
+            max-height: 300px; 
+            object-fit: cover; 
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem; 
+        }
+        /* Style for SweetAlert confirmation table */
+        .swal2-html-container {
+            text-align: left !important;
+        }
+        
+        /* --- Loading Overlay Style --- */
+        .loading-overlay {
+            position: fixed;
+            display: none; /* Hidden by default */
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background-color: rgba(255, 255, 255, 0.7);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
         }
     </style>
 </head>
 <body class="bg-light">
 
-<div id="app" class="container p-md-4 p-lg-5 bg-white shadow-lg my-5" style="max-width: 900px;">
+<div id="loadingOverlay" class="loading-overlay">
+    <img src="https://media1.giphy.com/media/mBMdeZHp6bqfkL4vBI/giphy.gif" alt="Loading..." style="width: 150px; border-radius: 8px;">
+</div>
 
-    <div class="card border-0">
-        <div class="card-body p-4">
-            <div class="row align-items-center mb-2">
-                <div class="col-4">
-                    <img src="https://lh3.googleusercontent.com/d/1N-FDOxt2QQhL7ynHxjN27GqMhSHIADgI" alt="logo" style="height: 1.5cm;">
-                </div>
-                <div class="col-4 text-center">
-                    <h1 class="h3 fw-bold text-dark">บันทึกข้อความ</h1>
-                </div>
-                <div class="col-4"></div>
-            </div>
-            <p class="mb-1"><strong>ส่วนราชการ</strong> งานวินัยนักเรียน กลุ่มงานกิจการนักเรียน โรงเรียนปากช่อง</p>
-            <div class="row">
-                <div class="col-md-6">
-                    <strong>ที่</strong> กน.10/
-                    <select class="form-select form-select-sm d-inline-block" style="width: auto;" v-model="form.refNo">
-                       <option value="">  </option>
-                       <option v-for="n in 200" :key="n" :value="n">{{ n }}</option>
-                    </select>
-                </div>
-                <div class="col-md-6">
-                    <strong class="me-2">วันที่</strong>
-                    <label class="position-relative d-inline-flex align-items-center border rounded px-2 py-1">
-                        <span class="me-2">{{ formattedDate }}</span>
-                        <i class="fas fa-calendar-alt text-secondary"></i>
-                        <input type="date" v-model="form.date" class="position-absolute top-0 start-0 w-100 h-100" style="opacity: 0; cursor: pointer;">
-                    </label>
-                </div>
-            </div>
-            <div class="mt-2"><strong>เรื่อง</strong> นักเรียนขาดเรียน/ หนีเรียน</div>
-            <hr class="my-2">
-            <div class="mt-1">เรียน ผู้อำนวยการโรงเรียนปากช่อง</div>
-        </div>
+
+<div id="app" class="card shadow-sm border-primary position-relative app-content-wrapper" style="padding: 35px; margin-bottom: 0px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);">
+
+    <div class="text-center" > 
+        <img src="https://lh5.googleusercontent.com/d/1vukskSijcccnZn65hiVooF8UT2bJLK5L" 
+                     alt="Form Banner" 
+                     class="app-banner img-fluid"
+                     onerror="this.onerror=null;this.src='https://lh5.googleusercontent.com/d/1vukskSijcccnZn65hiVooF8UT2bJLK5L';">
+    </div>
+            
+    <div class="container text-center mt-3 mb-3">
+                <marquee behavior="scroll" direction="left" style="color:#000000; font-size: 15px;margin-top: 2px; margin-bottom: 2px;" onmouseover="this.stop();" onmouseout="this.start();"><h4 style="margin-top: 2px; margin-bottom: 4px;"><img src="https://lh5.googleusercontent.com/d/1cD2nVKNscJg1DJPnkaakah7Nz4ez_BZS" height="12" width="25" > ยินดีต้อนรับเข้าสู่ระบบติดตามนักเรียนขาดเรียน/หนีเรียน โรงเรียนปากช่อง :: ออกแบบและพัฒนาโดย KT | Tanasarn Sirak <img src="https://lh5.googleusercontent.com/d/1cD2nVKNscJg1DJPnkaakah7Nz4ez_BZS" height="12" width="25" ></h4></marquee>
     </div>
 
-    <form @submit.prevent="submitForm" class="needs-validation" novalidate>
-        <div class="p-4 border rounded bg-light">
-            <div class="container-fluid px-0">
-                <div class="row gx-3 gy-2 align-items-center mb-3">
-                    <div class="col-auto" style="text-indent: 2.5em;"><label class="col-form-label">ข้าพเจ้า</label></div>
-                    <div class="col-sm-4 col-md-3 position-relative">
-                        <input type="text" placeholder="ชื่อ-สกุลครูที่ปรึกษา" class="form-control form-control-sm" v-model.trim="form.teacherName" required>
-                        <div class="invalid-tooltip">กรุณากรอกชื่อ-สกุลครูที่ปรึกษา</div>
+
+    <ul class="nav nav-tabs mb-4" id="mainTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="form-tab" data-bs-toggle="tab" data-bs-target="#form-tab-pane" type="button" role="tab" aria-controls="form-tab-pane" aria-selected="true">
+                <i class="fas fa-file-alt me-2"></i>บันทึกข้อมูล (ฟอร์ม)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="data-tab" data-bs-toggle="tab" data-bs-target="#data-tab-pane" type="button" role="tab" aria-controls="data-tab-pane" aria-selected="false">
+                <i class="fas fa-table me-2"></i>ข้อมูลนักเรียนขาดเรียน/หนีเรียน
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="mainTabContent">
+        <div class="tab-pane fade show active" id="form-tab-pane" role="tabpanel" aria-labelledby="form-tab" tabindex="0">
+            <div class="card border-0">
+                <div class="card-body p-4">
+                    <div class="row align-items-center mb-2">
+                        <div class="col-4">
+                            <img src="https://lh3.googleusercontent.com/d/1N-FDOxt2QQhL7ynHxjN27GqMhSHIADgI" alt="logo" style="height: 1.5cm;">
+                        </div>
+                        <div class="col-4 text-center">
+                            <h1 class="h3 fw-bold text-dark">บันทึกข้อความ</h1>
+                        </div>
+                        <div class="col-4"></div>
                     </div>
-                    <div class="col-auto"><label class="col-form-label">เป็นครูที่ปรึกษา ม.</label></div>
-                    <div class="col-sm-2 position-relative">
-                        <input type="text" placeholder="ชั้น/ห้อง" class="form-control form-control-sm" v-model.trim="form.className" required pattern="^[1-6]\/[1-9][0-9]*$">
-                        <div class="invalid-tooltip">ใส่ "ชั้น/ห้อง" (เช่น 6/12)</div>
+                    <p class="mb-1"><strong>ส่วนราชการ</strong> งานวินัยนักเรียน กลุ่มงานกิจการนักเรียน โรงเรียนปากช่อง</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>ที่</strong> กน.10/
+                            <select class="form-select form-select-sm d-inline-block" style="width: auto;" v-model="form.refNo">
+                               <option value="">  </option>
+                               <option v-for="n in 200" :key="n" :value="n">{{ n }}</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <strong class="me-2">วันที่</strong>
+                            <label class="position-relative d-inline-flex align-items-center border rounded px-2 py-1">
+                                <span class="me-2">{{ formattedDate }}</span>
+                                <i class="fas fa-calendar-alt text-secondary"></i>
+                                <input type="date" v-model="form.date" class="position-absolute top-0 start-0 w-100 h-100" style="opacity: 0; cursor: pointer;">
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mt-2"><strong>เรื่อง</strong> นักเรียนขาดเรียน/ หนีเรียน</div>
+                    <hr class="my-2">
+                    <div class="mt-1">เรียน ผู้อำนวยการโรงเรียนปากช่อง</div>
+                </div>
+            </div>
+
+            <form @submit.prevent="submitForm" class="needs-validation" novalidate>
+                <div class="p-4 border rounded bg-light">
+                    <div class="container-fluid px-0">
+                        <div class="row gx-3 gy-2 align-items-center mb-3">
+                            <div class="col-auto" style="text-indent: 2.5em;"><label class="col-form-label">ข้าพเจ้า</label></div>
+                            <div class="col-sm-4 col-md-3 position-relative">
+                                <input type="text" placeholder="ชื่อ-สกุลครูที่ปรึกษา" class="form-control form-control-sm" v-model.trim="form.teacherName" required>
+                                <div class="invalid-tooltip">กรุณากรอกชื่อ-สกุลครูที่ปรึกษา</div>
+                            </div>
+                            <div class="col-auto"><label class="col-form-label">เป็นครูที่ปรึกษา ม.</label></div>
+                            <div class="col-sm-2 position-relative">
+                                <input type="text" placeholder="ชั้น/ห้อง" class="form-control form-control-sm" v-model.trim="form.className" required pattern="^[1-6]\/[1-9][0-9]*$">
+                                <div class="invalid-tooltip">ใส่ "ชั้น/ห้อง" (เช่น 6/12)</div>
+                            </div>
+                        </div>
+                        <div class="row gx-2 gy-2 align-items-center mb-3">
+                             <div class="col-auto"><label class="col-form-label" style="line-height: 1;">ได้ติดตามการมาเรียนของนักเรียน ซึ่งขาดเรียนติดต่อกัน ๓ วัน หรือหนีเรียน ๓ ชั่วโมงต่อสัปดาห์ขึ้นไป โดยได้ติดตามนักเรียน เป็นครั้งที่</label></div>
+                            <div class="col-auto">
+                                <select class="form-select form-select-sm" style="width: auto;" v-model="form.occurrence">
+                                    <option>1</option> <option>2</option> <option>3</option>
+                                </select>
+                            </div>
+                            <div class="col-auto"><label class="col-form-label" style="line-height: 1;">ตั้งแต่วันที่</label></div>
+                            <div class="col-auto">
+                                <label class="position-relative d-inline-flex align-items-center border rounded px-2 py-1" :class="{'is-invalid': !form.startDate && wasValidated}">
+                                    <span class="me-2">{{ formattedStartDate || 'เลือกวันที่' }}</span><i class="fas fa-calendar-alt text-secondary"></i>
+                                    <input type="date" v-model="form.startDate" class="position-absolute top-0 start-0 w-100 h-100" style="opacity: 0; cursor: pointer;" required>
+                                </label>
+                            </div>
+                            <div class="col-auto"><label class="col-form-label" style="line-height: 1;">ถึงวันที่</label></div>
+                            <div class="col-auto">
+                                <label class="position-relative d-inline-flex align-items-center border rounded px-2 py-1" :class="{'is-invalid': !form.endDate && wasValidated}">
+                                    <span class="me-2">{{ formattedEndDate || 'เลือกวันที่' }}</span><i class="fas fa-calendar-alt text-secondary"></i>
+                                    <input type="date" v-model="form.endDate" class="position-absolute top-0 start-0 w-100 h-100" style="opacity: 0; cursor: pointer;" required>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div v-for="(student, index) in form.students" :key="index" class="row g-2 align-items-center mb-2 p-2 border rounded">
+                                <div class="col-auto fw-bold">{{ index + 1 }}.</div>
+                                <div class="col-sm-4 position-relative">
+                                    <label class="form-label visually-hidden">ชื่อ-สกุลนักเรียน</label>
+                                    <input type="text" placeholder="ชื่อ-สกุลนักเรียน" class="form-control form-control-sm" v-model.trim="student.name" required>
+                                    <div class="invalid-tooltip">กรุณากรอกชื่อ-สกุลนักเรียน</div>
+                                </div>
+                                <div class="col-auto"><label class="col-form-label">เลขประจำตัว</label></div>
+                                <div class="col-sm-2 position-relative">
+                                    <input type="text" placeholder="เลขประจำตัว" class="form-control form-control-sm" v-model.trim="student.id" required pattern="\d{1,5}" maxlength="5">
+                                    <div class="invalid-tooltip">ใส่เลข 5 หลัก</div>
+                                </div>
+                                <div class="col-auto">
+                                    <span class="form-check form-check-inline"><input class="form-check-input" type="radio" :name="'absenceType-' + index" :id="'absent-' + index" value="ไม่มาโรงเรียน" v-model="student.absenceType" required><label class="form-check-label" :for="'absent-' + index">ขาดเรียน</label></span>
+                                    <span class="form-check form-check-inline"><input class="form-check-input" type="radio" :name="'absenceType-' + index" :id="'truant-' + index" value="หนีเรียน" v-model="student.absenceType" required><label class="form-check-label" :for="'truant-' + index">หนีเรียน</label></span>
+                                </div>
+                                <div class="col-auto">
+                                    <button type="button" class="btn btn-danger btn-sm" @click="removeStudent(index)" v-if="form.students.length > 1"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </div>
+                            <div class="mt-2"><button type="button" class="btn btn-success btn-sm" @click="addStudent" v-if="form.students.length < 10"><i class="fas fa-plus"></i> เพิ่มรายชื่อนักเรียน</button></div>
+                        </div>
+                        <div class="mt-3 position-relative">
+                            <label for="followUpResult" class="form-label" style="text-indent: 2.5em;">ข้าพเจ้าได้ติดตามผ่านช่องทางไลน์/ โทรศัพท์ผู้ปกครอง และส่งจดหมายแล้ว ผลการติดตามนักเรียน ดังนี้</label>
+                            <textarea class="form-control" id="followUpResult" rows="3" placeholder="ระบุผลการติดตาม..." v-model.trim="form.followUpResult" required></textarea>
+                            <div class="invalid-tooltip">กรุณาระบุผลการติดตาม</div>
+                        </div>
+                    </div>
+                    <div class="col-auto mt-2" style="text-indent: 2.5em;"><label class="col-form-label">จึงเรียนเพื่อโปรดพิจารณา</label></div>
+                    <div class="d-flex justify-content-center mt-4">
+                        <div class="text-center w-100" style="max-width: 400px;">
+                            <p class="fw-bold">ลงชื่อครูที่ปรึกษา</p>
+                            <div class="signature-pad-container mt-2" :class="{ 'border-danger': isSignatureInvalid }">
+                                <canvas class="signature-canvas"></canvas>
+                            </div>
+                            <div v-if="isSignatureInvalid" class="text-danger small mt-1">กรุณาลงลายมือชื่อ</div>
+                            <button type="button" class="btn btn-sm btn-outline-secondary mt-1 clear-signature-btn no-print">ล้างลายเซ็น</button>
+                            <p class="mt-2 mb-0">( {{ form.teacherName || '.........................................' }} )</p>
+                            <p class="small">ตำแหน่งครูที่ปรึกษา ชั้น ม. {{ form.className || '.../...' }}</p>
+                        </div>
                     </div>
                 </div>
+                <div class="d-flex justify-content-center gap-3 my-4 no-print">
+                    <button type="submit" class="btn btn-primary btn-lg"><i class="fas fa-paper-plane me-2"></i>ส่งข้อมูลและสร้าง PDF</button>
+                </div>
+            </form>
+        </div>
 
-                <div class="row gx-2 gy-2 align-items-center mb-3">
-                    <div class="col-auto">
-                        <label class="col-form-label" style="line-height: 1;">ได้ติดตามการมาเรียนของนักเรียน ซึ่งขาดเรียนติดต่อกัน ๓ วัน หรือหนีเรียน ๓ ชั่วโมงต่อสัปดาห์ขึ้นไป โดยได้ติดตาม</label>
-                    </div>
-					<div class="col-auto">
-                        <label class="col-form-label" style="line-height: 1;">นักเรียน เป็นครั้งที่</label>
-                    </div>
-                    <div class="col-auto">
-                        <select class="form-select form-select-sm" style="width: auto;" v-model="form.occurrence">
-                            <option>1</option> <option>2</option> <option>3</option>
+        <div class="tab-pane fade" id="data-tab-pane" role="tabpanel" aria-labelledby="data-tab" tabindex="0">
+             <div v-if="table.isLoading" class="text-center p-5">
+                <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3 text-muted">กำลังโหลดข้อมูลนักเรียน...</p>
+            </div>
+             <div v-if="!table.isLoading && table.error" class="alert alert-danger">
+                <h4 class="alert-heading"><i class="fas fa-exclamation-triangle"></i> เกิดข้อผิดพลาด</h4>
+                <p>ไม่สามารถโหลดข้อมูลได้ โปรดตรวจสอบว่าชีต "Datatable" มีอยู่จริงและแชร์สิทธิ์อย่างถูกต้อง</p>
+                <hr>
+                <p class="mb-0">รายละเอียด: {{ table.error }}</p>
+            </div>
+            <div v-show="!table.isLoading && !table.error">
+                 <div class="row g-2 mb-3 p-3 border rounded bg-light align-items-center">
+                    <div class="col-md-6 col-lg-3">
+                        <label for="filterAdvisor" class="form-label fw-bold"><i class="fas fa-user-tie me-1"></i>ครูที่ปรึกษา</label>
+                        <select id="filterAdvisor" class="form-select form-select-sm" v-model="table.filters.advisor">
+                            <option value="">ทั้งหมด</option>
+                            <option v-for="advisor in table.uniqueAdvisors" :key="advisor" :value="advisor">{{ advisor }}</option>
                         </select>
                     </div>
-                    <div class="col-auto">
-                        <label class="col-form-label" style="line-height: 1;">ตั้งแต่วันที่</label>
+                    <div class="col-md-6 col-lg-3">
+                         <label for="filterAbsenceType" class="form-label fw-bold"><i class="fas fa-user-clock me-1"></i>ประเภทการขาด</label>
+                         <select id="filterAbsenceType" class="form-select form-select-sm" v-model="table.filters.absenceType">
+                            <option value="">ทั้งหมด</option>
+                            <option v-for="type in table.uniqueAbsenceTypes" :key="type" :value="type">{{ type }}</option>
+                        </select>
                     </div>
-                    <div class="col-auto">
-                        <label class="position-relative d-inline-flex align-items-center border rounded px-2 py-1" :class="{'is-invalid': !form.startDate && wasValidated}">
-                            <span class="me-2">{{ formattedStartDate || 'เลือกวันที่' }}</span><i class="fas fa-calendar-alt text-secondary"></i>
-                            <input type="date" v-model="form.startDate" class="position-absolute top-0 start-0 w-100 h-100" style="opacity: 0; cursor: pointer;" required>
-                        </label>
+                    <div class="col-md-6 col-lg-2">
+                         <label for="filterGrade" class="form-label fw-bold"><i class="fas fa-layer-group me-1"></i>ระดับชั้น</label>
+                        <select id="filterGrade" class="form-select form-select-sm" v-model="table.filters.grade">
+                            <option value="">ทั้งหมด</option>
+                            <option v-for="grade in table.uniqueGrades" :key="grade" :value="grade">ม.{{ grade }}</option>
+                        </select>
                     </div>
-                    <div class="col-auto">
-                        <label class="col-form-label" style="line-height: 1;">ถึงวันที่</label>
+                    <div class="col-md-6 col-lg-2">
+                         <label for="filterFollowUp" class="form-label fw-bold"><i class="fas fa-hashtag me-1"></i>ครั้งที่ติดตาม</label>
+                        <select id="filterFollowUp" class="form-select form-select-sm" v-model="table.filters.followUp">
+                            <option value="">ทั้งหมด</option>
+                            <option v-for="count in table.uniqueFollowUps" :key="count" :value="count">{{ count }}</option>
+                        </select>
                     </div>
-                    <div class="col-auto">
-                        <label class="position-relative d-inline-flex align-items-center border rounded px-2 py-1" :class="{'is-invalid': !form.endDate && wasValidated}">
-                            <span class="me-2">{{ formattedEndDate || 'เลือกวันที่' }}</span><i class="fas fa-calendar-alt text-secondary"></i>
-                            <input type="date" v-model="form.endDate" class="position-absolute top-0 start-0 w-100 h-100" style="opacity: 0; cursor: pointer;" required>
-                        </label>
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <div v-for="(student, index) in form.students" :key="index" class="row g-2 align-items-center mb-2 p-2 border rounded">
-                        <div class="col-auto fw-bold">{{ index + 1 }}.</div>
-                        <div class="col-sm-4 position-relative">
-                            <label class="form-label visually-hidden">ชื่อ-สกุลนักเรียน</label>
-                            <input type="text" placeholder="ชื่อ-สกุลนักเรียน" class="form-control form-control-sm" v-model.trim="student.name" required>
-                            <div class="invalid-tooltip">กรุณากรอกชื่อ-สกุลนักเรียน</div>
-                        </div>
-                        <div class="col-auto"><label class="col-form-label">เลขประจำตัว</label></div>
-                        <div class="col-sm-2 position-relative">
-                            <input type="text" placeholder="เลขประจำตัว" class="form-control form-control-sm" v-model.trim="student.id" required pattern="\d{1,5}" maxlength="5">
-                            <div class="invalid-tooltip">ใส่เลข 5 หลัก</div>
-                        </div>
-                        <div class="col-auto">
-                            <span class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" :name="'absenceType-' + index" :id="'absent-' + index" value="ไม่มาโรงเรียน" v-model="student.absenceType" required>
-                                <label class="form-check-label" :for="'absent-' + index">ขาดเรียน</label>
-                            </span>
-                            <span class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" :name="'absenceType-' + index" :id="'truant-' + index" value="หนีเรียน" v-model="student.absenceType" required>
-                                <label class="form-check-label" :for="'truant-' + index">หนีเรียน</label>
-                            </span>
-                        </div>
-                        <div class="col-auto">
-                            <button type="button" class="btn btn-danger btn-sm" @click="removeStudent(index)" v-if="form.students.length > 1">
-                                <i class="fas fa-trash"></i></button>
-                        </div>
-                    </div>
-                    <div class="mt-2">
-                        <button type="button" class="btn btn-success btn-sm" @click="addStudent" v-if="form.students.length < 10">
-                            <i class="fas fa-plus"></i> เพิ่มรายชื่อนักเรียน
+                     <div class="col-lg-2 d-flex align-items-end">
+                        <button @click="refreshTableData" class="btn btn-info btn-sm w-100" :disabled="table.isLoading">
+                            <i class="fas fa-sync-alt me-1"></i> รีเฟรชข้อมูล
                         </button>
                     </div>
                 </div>
-                
-                <div class="mt-3 position-relative">
-                    <label for="followUpResult" class="form-label" style="text-indent: 2.5em;">ข้าพเจ้าได้ติดตามผ่านช่องทางไลน์/ โทรศัพท์ผู้ปกครอง และส่งจดหมายแล้ว ผลการติดตามนักเรียน ดังนี้</label>
-                    <textarea class="form-control" id="followUpResult" rows="3" placeholder="ระบุผลการติดตาม..." v-model.trim="form.followUpResult" required></textarea>
-                    <div class="invalid-tooltip">กรุณาระบุผลการติดตาม</div>
-                </div>
-            </div>
 
-			<div class="col-auto mt-2" style="text-indent: 2.5em;"><label class="col-form-label">จึงเรียนเพื่อโปรดพิจารณา</label></div>
-			<div class="d-flex justify-content-center mt-4">
-                <div class="text-center w-100" style="max-width: 400px;">
-                    <p class="fw-bold">ลงชื่อครูที่ปรึกษา</p>
-                    <div class="signature-pad-container mt-2" :class="{ 'border-danger': isSignatureInvalid }">
-                        <canvas class="signature-canvas"></canvas>
-                    </div>
-                    <div v-if="isSignatureInvalid" class="text-danger small mt-1">กรุณาลงลายมือชื่อ</div>
-                    <button type="button" class="btn btn-sm btn-outline-secondary mt-1 clear-signature-btn no-print">ล้างลายเซ็น</button>
-                    <p class="mt-2 mb-0">( {{ form.teacherName || '.........................................' }} )</p>
-                    <p class="small">ตำแหน่งครูที่ปรึกษา ชั้น ม. {{ form.className || '.../...' }}</p>
+                <div class="table-responsive">
+                    <table id="studentDataTable" class="table table-striped table-bordered table-hover" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>ที่</th>
+                                <th>รูป</th>
+                                <th>เลขประจำตัว</th>
+                                <th>ชื่อ-สกุล</th>
+                                <th>ชั้น</th>
+                                <th>เลขที่</th>
+                                <th>ประเภทการขาด</th>
+                                <th>ครั้งที่</th>
+                                <th>ครูที่ปรึกษา</th>
+                                <th>ไฟล์</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
             </div>
         </div>
-        
-        <div class="d-flex justify-content-center gap-3 my-4 no-print">
-            <button type="submit" class="btn btn-primary btn-lg">
-                <i class="fas fa-paper-plane me-2"></i>ส่งข้อมูลและสร้าง PDF
-            </button>
-        </div>
-    </form>
     </div>
+	        <footer style="text-align: center;background-color:#faff99; padding: 10px 0; margin-top: auto; border-top: 1px solid #e0e0e0; font-size: 0.9em; color: #555; width: 100%;">
+                :: Created and Develop by KT|Tanasarn Sirak ::
+                <div class="container text-center">
+                <a href="https://line.me/ti/p/3F7VGrqgUr" target="_blank"><i class="fa-solid fa-comments"></i></a> <a style="color:red;text-decoration:none;font-size:12px" href="https://line.me/ti/p/3F7VGrqgUr" target="_blank"> สอบถาม/แจ้งปัญหา :: <span style="font-size:12px;color:black">KT | Tanasarn Sirak © <script>document.write(new Date().getFullYear()+543)</script> </a>
+                </div>
+            </footer>
+            
+            <div class="text-center mt-3">
+            :: จำนวนผู้ใช้งาน ::
+            <a href="https://www.freecounterstat.com" title="website counter"><img src="https://counter1.optistats.ovh/private/freecounterstat.php?c=uwgfnf4ee1nu15h57t14a9pnpf2h58za" border="0" title="website counter" alt="website counter"></a>
+            </div> 
+</div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/2.0.8/js/dataTables.js"></script>
+<script src="https://cdn.datatables.net/2.0.8/js/dataTables.bootstrap5.js"></script>
+<script src="https://cdn.datatables.net/responsive/3.0.2/js/dataTables.responsive.js"></script>
+<script src="https://cdn.datatables.net/responsive/3.0.2/js/responsive.bootstrap5.js"></script>
+
 <script>
-    const { createApp, ref, computed, onMounted } = Vue
+    const { createApp, ref, computed, onMounted, watch } = Vue
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxT7gn5oKb7fXoBTIwuyUE9XDssfOOON-TwW4NNn5sE3gKamjKzMBXehO3qOEtrKVSy/exec';
     
     let teacherSignaturePad = null;
+    let dataTableInstance = null;
+    
+    // --- NEW: Robust Loading Overlay Functions ---
+    let loadingOperations = 0;
+    const loadingOverlay = document.getElementById('loadingOverlay');
+
+    function showLoadingOverlay() {
+        loadingOperations++;
+        if (loadingOverlay) loadingOverlay.style.display = 'flex';
+    }
+
+    function hideLoadingOverlay() {
+        loadingOperations--;
+        if (loadingOperations <= 0) {
+            if (loadingOverlay) loadingOverlay.style.display = 'none';
+            loadingOperations = 0; // Reset to prevent going negative
+        }
+    }
+
+    // --- NEW: Show overlay on initial page load for 5 seconds ---
+    document.addEventListener('DOMContentLoaded', () => {
+        showLoadingOverlay();
+        setTimeout(() => {
+            hideLoadingOverlay();
+        }, 5000);
+    });
+
 
     function formatDateToThai(dateString) {
         if (!dateString) return '';
@@ -194,152 +394,280 @@
 
     createApp({
         setup() {
-            // --- START: MODIFIED CODE ---
+            // --- FORM STATE ---
             const getWeekBoundaries = () => {
                 const today = new Date();
-                const day = today.getDay(); // Sunday - 0, Monday - 1
-                const mondayOffset = (day === 0) ? -6 : 1 - day; // Adjust for Sunday
-                
+                const day = today.getDay();
+                const mondayOffset = (day === 0) ? -6 : 1 - day;
                 const monday = new Date(today);
                 monday.setDate(today.getDate() + mondayOffset);
-                
                 const friday = new Date(monday);
                 friday.setDate(monday.getDate() + 4);
-
                 const toYYYYMMDD = (d) => d.toISOString().slice(0, 10);
                 return { start: toYYYYMMDD(monday), end: toYYYYMMDD(friday) };
             };
             const week = getWeekBoundaries();
-
             const form = ref({
                 refNo: '', date: new Date().toISOString().slice(0, 10), teacherName: '',
                 className: '', occurrence: 1, 
-                startDate: week.start, // Set default start date
-                endDate: week.end,     // Set default end date
+                startDate: week.start, endDate: week.end,
                 students: [ { name: '', id: '', absenceType: 'ไม่มาโรงเรียน' } ],
                 followUpResult: ''
             });
-            // --- END: MODIFIED CODE ---
-
             const isSignatureInvalid = ref(false);
             const wasValidated = ref(false);
 
+            // --- DATA TABLE STATE ---
+            const table = ref({
+                data: [],
+                isLoading: true,
+                error: null,
+                filters: { advisor: '', absenceType: '', grade: '', followUp: '' },
+                uniqueAdvisors: computed(() => [...new Set(table.value.data.map(item => item.advisor).filter(Boolean))].sort()),
+                uniqueAbsenceTypes: computed(() => [...new Set(table.value.data.map(item => item.absenceType).filter(Boolean))].sort()),
+                uniqueGrades: computed(() => [...new Set(table.value.data.map(item => item.class ? item.class.split('/')[0] : '').filter(Boolean))].sort((a,b) => a-b)),
+                uniqueFollowUps: computed(() => [...new Set(table.value.data.map(item => item.followUpCount).filter(Boolean))].sort((a,b) => a-b)),
+            });
+
+            // --- FORM COMPUTED & METHODS ---
             const formattedDate = computed(() => formatDateToThai(form.value.date));
             const formattedStartDate = computed(() => formatDateToThai(form.value.startDate));
             const formattedEndDate = computed(() => formatDateToThai(form.value.endDate));
             
-            const addStudent = () => {
-                if (form.value.students.length < 10) {
-                    form.value.students.push({ name: '', id: '', absenceType: 'ไม่มาโรงเรียน' });
-                }
-            };
-
-            const removeStudent = (index) => {
-                if (form.value.students.length > 1) {
-                    form.value.students.splice(index, 1);
-                }
-            };
+            const addStudent = () => { if (form.value.students.length < 10) form.value.students.push({ name: '', id: '', absenceType: 'ไม่มาโรงเรียน' }); };
+            const removeStudent = (index) => { if (form.value.students.length > 1) form.value.students.splice(index, 1); };
             
             const resetForm = (formElement) => {
                 const newWeek = getWeekBoundaries();
                 formElement.classList.remove('was-validated');
                 formElement.reset();
                 wasValidated.value = false;
-                teacherSignaturePad.clear();
+                if(teacherSignaturePad) teacherSignaturePad.clear();
                 isSignatureInvalid.value = false;
                 Object.assign(form.value, {
                     refNo: '', date: new Date().toISOString().slice(0, 10),
                     teacherName: '', className: '', occurrence: 1,
-                    startDate: newWeek.start, // Reset to current week's Monday
-                    endDate: newWeek.end,     // Reset to current week's Friday
+                    startDate: newWeek.start, endDate: newWeek.end,
                     students: [{ name: '', id: '', absenceType: 'ไม่มาโรงเรียน' }],
                     followUpResult: ''
                 });
             };
 
-            onMounted(() => {
-                const canvas = document.querySelector('.signature-canvas');
-                teacherSignaturePad = new SignaturePad(canvas, { penColor: 'rgb(0, 0, 0)' });
-                function resizeCanvas() {
-                    const ratio = Math.max(window.devicePixelRatio || 1, 1);
-                    const rect = canvas.getBoundingClientRect();
-                    canvas.width = rect.width * ratio;
-                    canvas.height = rect.height * ratio;
-                    canvas.getContext("2d").scale(ratio, ratio);
-                    teacherSignaturePad.clear();
-                }
-                window.addEventListener("resize", resizeCanvas);
-                resizeCanvas();
-                teacherSignaturePad.addEventListener("beginStroke", () => { isSignatureInvalid.value = false; });
-                document.querySelector('.clear-signature-btn').addEventListener('click', () => { teacherSignaturePad.clear(); });
-            });
+            // --- DATATABLE METHODS ---
+            function initializeDataTable() {
+                if (dataTableInstance) { dataTableInstance.destroy(); }
+                dataTableInstance = new DataTable('#studentDataTable', {
+                    responsive: true,
+                    data: table.value.data,
+                    columns: [
+                        { data: 'rowNumber', className: 'text-center' },
+                        { 
+                            data: 'studentImage', 
+                            className: 'text-center', 
+                            orderable: false, 
+                            render: function(data, type, row) {
+                                const imgSrc = data || 'https://placehold.co/40x40/EFEFEF/AAAAAA?text=N/A';
+                                const studentName = $('<div>').text(row.studentName || 'ไม่มีชื่อ').html();
+                                return `<img src="${imgSrc}" 
+                                             alt="รูป" 
+                                             class="student-image-hoverable" 
+                                             data-student-name="${studentName}"
+                                             data-img-src="${imgSrc}"
+                                             onerror="this.onerror=null;this.src='https://placehold.co/40x40/EFEFEF/AAAAAA?text=N/A';">`;
+                            }
+                        },
+                        { data: 'studentId', className: 'text-center' },
+                        { data: 'studentName' },
+                        { data: 'class', className: 'text-center' },
+                        { data: 'classNumber', className: 'text-center' },
+                        { data: 'absenceType' },
+                        { data: 'followUpCount', className: 'text-center' },
+                        { data: 'advisor' },
+                        { data: 'fileUrl', className: 'text-center', orderable: false, render: (data) => data ? `<a href="${data}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="fas fa-file-pdf"></i></a>` : '' }
+                    ],
+                    language: { url: 'https://cdn.datatables.net/plug-ins/2.0.8/i18n/th.json' },
+                    order: [[0, 'desc']] 
+                });
+
+                // Add delegated event listener for image clicks
+                $('#studentDataTable tbody').off('click', 'img.student-image-hoverable').on('click', 'img.student-image-hoverable', function () {
+                    const studentName = $(this).data('student-name');
+                    const imgSrc = $(this).data('img-src');
+
+                    Swal.fire({
+                        title: studentName,
+                        imageUrl: imgSrc,
+                        imageWidth: 250,
+                        imageAlt: `รูปของ ${studentName}`,
+                        width: 400,
+                        padding: '1.25em',
+                        confirmButtonText: 'ปิด',
+                    });
+                });
+            }
+
+            const fetchStudentData = () => {
+                table.value.isLoading = true;
+                showLoadingOverlay(); // Show overlay
+                fetch(`${WEB_APP_URL}?action=getStudentData`)
+                    .then(res => res.json())
+                    .then(result => {
+                        if (result.status === 'success') {
+                            table.value.data = result.data;
+                            initializeDataTable();
+                            watch(table.value.filters, applyFilters, { deep: true });
+                        } else {
+                            throw new Error(result.message);
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Error fetching student data:", err);
+                        table.value.error = err.message;
+                    })
+                    .finally(() => {
+                        table.value.isLoading = false;
+                        hideLoadingOverlay(); // Hide overlay
+                    });
+            };
             
+            const refreshTableData = () => {
+                fetchStudentData();
+            };
+
+            const applyFilters = (newFilters) => {
+                 if (!dataTableInstance) return;
+                
+                let filteredData = [...table.value.data];
+
+                if (newFilters.advisor) {
+                    filteredData = filteredData.filter(item => item.advisor === newFilters.advisor);
+                }
+                if (newFilters.absenceType) {
+                    filteredData = filteredData.filter(item => item.absenceType === newFilters.absenceType);
+                }
+                if (newFilters.grade) {
+                    filteredData = filteredData.filter(item => item.class && item.class.startsWith(newFilters.grade + '/'));
+                }
+                if (newFilters.followUp) {
+                    filteredData = filteredData.filter(item => String(item.followUpCount) === String(newFilters.followUp));
+                }
+
+                dataTableInstance.clear().rows.add(filteredData).draw();
+            };
+
+            onMounted(() => {
+                // Init Signature Pad
+                const canvas = document.querySelector('.signature-canvas');
+                if (canvas) {
+                     teacherSignaturePad = new SignaturePad(canvas, { penColor: 'rgb(0, 0, 0)' });
+                     function resizeCanvas() {
+                        const ratio = Math.max(window.devicePixelRatio || 1, 1);
+                        const rect = canvas.getBoundingClientRect();
+                        canvas.width = rect.width * ratio;
+                        canvas.height = rect.height * ratio;
+                        canvas.getContext("2d").scale(ratio, ratio);
+                        teacherSignaturePad.clear();
+                    }
+                    window.addEventListener("resize", resizeCanvas);
+                    resizeCanvas();
+                    teacherSignaturePad.addEventListener("beginStroke", () => { isSignatureInvalid.value = false; });
+                    document.querySelector('.clear-signature-btn').addEventListener('click', () => { teacherSignaturePad.clear(); });
+                }
+            
+                const dataTab = document.querySelector('#data-tab');
+                dataTab.addEventListener('show.bs.tab', () => {
+                     if (table.value.data.length === 0 && table.value.isLoading) {
+                        fetchStudentData();
+                    }
+                }, { once: true });
+            });
+
+            watch(table.value.filters, applyFilters, { deep: true });
+
+            // --- FORM SUBMISSION ---
             const submitForm = (event) => {
                 const formElement = event.target;
                 wasValidated.value = true;
-                formElement.classList.add('was-validated'); // Ensure class is added for tooltips
+                formElement.classList.add('was-validated');
                 isSignatureInvalid.value = teacherSignaturePad && teacherSignaturePad.isEmpty();
                 
                 if (!formElement.checkValidity() || isSignatureInvalid.value) {
                     Swal.fire({ icon: 'error', title: 'ข้อมูลไม่สมบูรณ์', text: 'กรุณากรอกข้อมูลและลงลายมือชื่อให้ครบถ้วน' });
                     return;
                 }
-
-                const webAppUrl = 'https://script.google.com/macros/s/AKfycbxweZRSZJmjE0rd1pXQz3KP5-r4utS43uBKfeuYq663MfNxuZ6yeUORcZaHeGxo4gOG/exec'; 
+                
+                let confirmationHtml = `<p>โปรดยืนยันข้อมูลนักเรียนที่ต้องการบันทึก:</p>
+                                    <table class="table table-bordered table-sm">
+                                        <thead class="table-dark">
+                                            <tr>
+                                                <th>ชื่อ-สกุล</th>
+                                                <th>ชั้น</th>
+                                                <th>ประเภทการขาด</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>`;
+                form.value.students.forEach(student => {
+                    const studentName = student.name || '<i>(ไม่มีชื่อ)</i>';
+                    const className = form.value.className || '<i>(ไม่มีชั้น)</i>';
+                    const absenceType = student.absenceType || '<i>(ไม่ได้ระบุ)</i>';
+                    confirmationHtml += `<tr>
+                                            <td>${studentName}</td>
+                                            <td>${className}</td>
+                                            <td>${absenceType}</td>
+                                         </tr>`;
+                });
+                confirmationHtml += `   </tbody>
+                                      </table>`;
 
                 Swal.fire({
-                    title: 'กำลังส่งข้อมูล...', text: 'กรุณารอสักครู่',
-                    allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }
-                });
+                    title: 'ยืนยันการบันทึกข้อมูล?',
+                    html: confirmationHtml,
+                    icon: 'warning',
+                    width: '600px',
+                    showCancelButton: true,
+                    confirmButtonColor: '#0d6efd',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: '<i class="fas fa-check"></i> ยืนยันและส่งข้อมูล',
+                    cancelButtonText: '<i class="fas fa-times"></i> ยกเลิก'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        showLoadingOverlay(); // Show overlay
+                        
+                        const formData = new FormData();
+                        for (const key in form.value) {
+                            formData.append(key, key === 'students' ? JSON.stringify(form.value.students) : form.value[key]);
+                        }
+                        formData.append('signatureBase64', teacherSignaturePad.toDataURL('image/png'));
 
-                const formData = new FormData();
-                for (const key in form.value) {
-                    if (key === 'students') {
-                        formData.append('students', JSON.stringify(form.value.students));
-                    } else {
-                        formData.append(key, form.value[key]);
-                    }
-                }
-                formData.append('signatureBase64', teacherSignaturePad.toDataURL('image/png'));
-
-                fetch(webAppUrl, { method: 'POST', body: formData })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'สร้างเอกสารสำเร็จ!',
-                            html: `<p>บันทึกข้อมูลและสร้าง PDF เรียบร้อยแล้ว</p>`,
-                            showConfirmButton: true,
-                            confirmButtonText: '<i class="fas fa-download"></i> ดาวน์โหลด PDF',
-                            showDenyButton: true,
-                            denyButtonText: '<i class="fas fa-print"></i> พิมพ์ PDF',
-                            showCancelButton: true,
-                            cancelButtonText: 'กรอกฟอร์มใหม่'
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                window.open(data.pdfDownloadUrl, '_blank');
-                            } else if (result.isDenied) {
-                                window.open(data.pdfPrintUrl, '_blank');
-                            }
-                            resetForm(formElement);
+                        fetch(WEB_APP_URL, { method: 'POST', body: formData })
+                        .then(response => response.json())
+                        .then(data => {
+                            hideLoadingOverlay(); // Hide overlay
+                            if (data.status === 'success') {
+                                Swal.fire({
+                                    icon: 'success', title: 'สร้างเอกสารสำเร็จ!', html: `<p>บันทึกข้อมูลและสร้าง PDF เรียบร้อยแล้ว</p>`,
+                                    showConfirmButton: true, confirmButtonText: '<i class="fas fa-download"></i> ดาวน์โหลด PDF',
+                                    showDenyButton: true, denyButtonText: '<i class="fas fa-print"></i> พิมพ์ PDF',
+                                    showCancelButton: true, cancelButtonText: 'กรอกฟอร์มใหม่'
+                                }).then((result) => {
+                                    if (result.isConfirmed) window.open(data.pdfDownloadUrl, '_blank');
+                                    else if (result.isDenied) window.open(data.pdfPrintUrl, '_blank');
+                                    resetForm(formElement);
+                                });
+                            } else { throw new Error(data.message || 'เกิดข้อผิดพลาดในการบันทึกข้อมูล'); }
+                        })
+                        .catch(error => {
+                            hideLoadingOverlay(); // Hide overlay
+                            Swal.fire({ icon: 'error', title: 'การเชื่อมต่อล้มเหลว', html: `ไม่สามารถส่งข้อมูลได้ โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ต<br><br><small><i>Error: ${error.message}</i></small>` });
                         });
-                    } else {
-                        throw new Error(data.message || 'เกิดข้อผิดพลาดในการบันทึกข้อมูล');
                     }
-                })
-                .catch(error => {
-                    console.error('Fetch Error:', error);
-                    Swal.fire({
-                        icon: 'error', title: 'การเชื่อมต่อล้มเหลว',
-                        html: `ไม่สามารถส่งข้อมูลได้ โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ต<br><br><small><i>Error: ${error.message}</i></small>`,
-                    });
                 });
             }
 
             return { 
                 form, submitForm, formattedDate, formattedStartDate, formattedEndDate, 
-                isSignatureInvalid, wasValidated, addStudent, removeStudent
+                isSignatureInvalid, wasValidated, addStudent, removeStudent, table,
+                refreshTableData
             }
         }
     }).mount('#app')
